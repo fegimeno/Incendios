@@ -6,10 +6,10 @@ library(dplyr)
 
 # Leaflet bindings are a bit slow; for now we'll just sample to compensate
 set.seed(100)
-zipdata <- allzips
+df <- allzips
 # By ordering by centile, we ensure that the (comparatively rare) SuperZIPs
 # will be drawn last and thus be easier to see
-zipdata <- zipdata[order(zipdata$rol),]
+
 
 function(input, output, session) {
   
@@ -17,18 +17,18 @@ function(input, output, session) {
   
   # Create the map
 data <- reactive({
-    x <- zipdata
+    x <- df
   })
   
   output$mymap <- renderLeaflet({
-    zipdata <- data()
+    df <- data()
     
-    m <- leaflet(data = zipdata) %>%
+    m <- leaflet(data = df) %>%
       addTiles() %>%
-      addMarkers(lng = ~LONG,
-                 lat = ~LAT,
-                 popup = paste("Incendio", zipdata$nombre_inc, "<br>",
-                               "Plan de manejo", zipdata$SOLICITUD))
+      addMarkers(lng = ~Longitud,
+                 lat = ~Latitud,
+                 popup = paste("Incendio", df$nombre_inc, "<br>",
+                               "Plan de manejo", df$SOLICITUD))
     m
   })
   
@@ -88,15 +88,15 @@ data <- reactive({
 #                layerId="colorLegend")
 #  })
   
-  # Show a popup at the given location
-  showZipcodePopup <- function(rol, lat, lng) {
-    selectedZip <- allzips[allzips$rol == rol,]
-    content <- as.character(tagList(
-      tags$h4("Score:", as.integer(selectedZip$año)),
-      tags$strong(HTML(sprintf("%s, %s %s",
-                               selectedZip$NOM_COM, selectedZip$NOM_REG, selectedZip$rol
-      )))))
-      }
+#  # Show a popup at the given location
+#  showZipcodePopup <- function(rol, lat, lng) {
+#    selectedZip <- allzips[allzips$rol == rol,]
+#    content <- as.character(tagList(
+#      tags$h4("Score:", as.integer(selectedZip$año)),
+#      tags$strong(HTML(sprintf("%s, %s %s",
+#                               selectedZip$NOM_COM, selectedZip$NOM_REG, selectedZip$rol
+#      )))))
+#      }
 #  showZipcodePopup <- function(zipcode, lat, lng) {
 #    selectedZip <- allzips[allzips$rol == rol,]
 #    content <- as.character(tagList(
@@ -112,16 +112,16 @@ data <- reactive({
 #  }
   
   # When map is clicked, show a popup with city info
-  observe({
-    leafletProxy("map") %>% clearPopups()
-    event <- input$map_shape_click
-    if (is.null(event))
-      return()
+#  observe({
+#    leafletProxy("map") %>% clearPopups()
+#    event <- input$map_shape_click
+#    if (is.null(event))
+#      return()
     
-    isolate({
-      showZipcodePopup(event$id, event$lat, event$lng)
-    })
-  })
+#    isolate({
+#      showZipcodePopup(event$id, event$lat, event$lng)
+#    })
+#  })
   
   
   ## Data Explorer ###########################################
