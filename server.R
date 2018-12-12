@@ -45,7 +45,7 @@ function(input, output, session) {
 #  output$histCentile <- renderPlot({
     # If no zipcodes are in view, don't plot
 #    if (nrow(zipsInBounds()) == 0)
-      return(NULL)
+#      return(NULL)
     
 #    hist(zipsInBounds()$centile,
 #         breaks = centileBreaks,
@@ -180,4 +180,4 @@ function(input, output, session) {
     
 #    DT::datatable(df, options = list(ajax = list(url = action)), escape = FALSE)
 #  })
-#}
+}
