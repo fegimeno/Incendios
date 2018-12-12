@@ -66,34 +66,34 @@ function(input, output, session) {
   
   # This observer is responsible for maintaining the circles and legend,
   # according to the variables the user has chosen to map to color and size.
-  observe({
-    colorBy <- input$color
-    sizeBy <- input$size
+#  observe({
+#    colorBy <- input$color
+#    sizeBy <- input$size
     
-    if (colorBy == "superzip") {
+#    if (colorBy == "superzip") {
       # Color and palette are treated specially in the "superzip" case, because
       # the values are categorical instead of continuous.
-      colorData <- ifelse(zipdata$ano >= (0 - input$threshold), "yes", "no")
-      pal <- colorFactor("viridis", colorData)
-    } else {
-      colorData <- zipdata[[colorBy]]
-      pal <- colorBin("viridis", colorData, 7, pretty = FALSE)
-    }
+#      colorData <- ifelse(zipdata$ano >= (0 - input$threshold), "yes", "no")
+#      pal <- colorFactor("viridis", colorData)
+#    } else {
+#      colorData <- zipdata[[colorBy]]
+#      pal <- colorBin("viridis", colorData, 7, pretty = FALSE)
+#    }
     
-    if (sizeBy == "superzip") {
-      # Radius is treated specially in the "superzip" case.
-      radius <- ifelse(zipdata$centile >= (100 - input$threshold), 30000, 3000)
-    } else {
-      radius <- zipdata[[sizeBy]] / max(zipdata[[sizeBy]]) * 30000
-    }
+#    if (sizeBy == "superzip") {
+#      # Radius is treated specially in the "superzip" case.
+#      radius <- ifelse(zipdata$centile >= (100 - input$threshold), 30000, 3000)
+#    } else {
+#      radius <- zipdata[[sizeBy]] / max(zipdata[[sizeBy]]) * 30000
+#    }
     
-    leafletProxy("map", data = zipdata) %>%
-      clearShapes() %>%
-      addCircles(~LONG, ~LAT, radius=radius, layerId=~nombre_inc,
-                 stroke=FALSE, fillOpacity=0.4, fillColor=pal(colorData)) %>%
-      addLegend("bottomleft", pal=pal, values=colorData, title=colorBy,
-                layerId="colorLegend")
-  })
+#    leafletProxy("map", data = zipdata) %>%
+#      clearShapes() %>%
+#      addCircles(~LONG, ~LAT, radius=radius, layerId=~nombre_inc,
+#                 stroke=FALSE, fillOpacity=0.4, fillColor=pal(colorData)) %>%
+#      addLegend("bottomleft", pal=pal, values=colorData, title=colorBy,
+#                layerId="colorLegend")
+#  })
   
   # Show a popup at the given location
   showZipcodePopup <- function(rol, lat, lng) {
@@ -134,14 +134,14 @@ function(input, output, session) {
   ## Data Explorer ###########################################
   
   observe({
-    cities <- if (is.null(input$states)) character(0) else {
-      filter(cleantable, State %in% input$states) %>%
-        `$`('City') %>%
+    comuna <- if (is.null(input$Region)) character(0) else {
+      filter(cleantable, Region %in% input$Region) %>%
+        `$`('Comuna') %>%
         unique() %>%
         sort()
     }
-    stillSelected <- isolate(input$cities[input$cities %in% cities])
-    updateSelectInput(session, "cities", choices = cities,
+    stillSelected <- isolate(input$Comuna[input$Comuna %in% Comuna])
+    updateSelectInput(session, "Comuna", choices = Comuna,
                       selected = stillSelected)
   })
   
