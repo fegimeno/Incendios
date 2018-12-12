@@ -27,8 +27,9 @@ data <- reactive({
       addTiles() %>%
       addMarkers(lng = ~Longitud,
                  lat = ~Latitud,
-                 popup = paste("Incendio", df$nombre_inc, "<br>",
-                               "Plan de manejo", df$SOLICITUD))
+                 popup = paste("Incendio", df$Incendio, "<br>",
+                               "Plan de manejo", df$Plan, "<br>",
+                              "Tipo de combustible", df$Combustible,))
     m
   })
   
@@ -128,7 +129,7 @@ data <- reactive({
   
   observe({
     comunas <- if (is.null(input$Region)) character(0) else {
-      filter(cleantable, Region %in% input$Region) %>%
+      filter(df, Region %in% input$Region) %>%
         `$`('Comuna') %>%
         unique() %>%
         sort()
