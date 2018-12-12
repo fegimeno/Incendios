@@ -9,3 +9,18 @@ df$LONG <- as.numeric(df$LONG)
 
 df$Latitud <- jitter(df$LAT)
 df$Longitud <- jitter(df$LONG)
+
+df <- df %>%
+  select(
+    Temporada = temporada,
+    Incendio = nombre_inc,
+    Rol = rol,
+    Combustible = SUBUSO,
+    Region = NOM_REG,
+    Provincia = NOM_PROV,
+    Comuna = NOM_COM,
+    Plan = SOLICITUD,
+    Latatitud = Latitud,
+    Longitud = Longitud
+  )
+
