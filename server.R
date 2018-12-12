@@ -96,6 +96,14 @@ function(input, output, session) {
   })
   
   # Show a popup at the given location
+  showZipcodePopup <- function(rol, lat, lng) {
+    selectedZip <- allzips[allzips$rol == rol,]
+    content <- as.character(tagList(
+      tags$h4("Score:", as.integer(selectedZip$año)),
+      tags$strong(HTML(sprintf("%s, %s %s",
+                               selectedZip$NOM_COM, selectedZip$NOM_REG, selectedZip$rol
+      )))))
+      }
 #  showZipcodePopup <- function(zipcode, lat, lng) {
 #    selectedZip <- allzips[allzips$rol == rol,]
 #    content <- as.character(tagList(
