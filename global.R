@@ -1,6 +1,6 @@
 library(dplyr)
 
-df <- readRDS("Data.rds")
+df <- readRDS("Data/Data.rds")
 
 df$LAT <- gsub(",", "", df$LAT)
 df$LAT <- as.numeric(df$LAT)  
