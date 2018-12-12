@@ -29,7 +29,7 @@ data <- reactive({
                  lat = ~Latitud,
                  popup = paste("Incendio", df$Incendio, "<br>",
                                "Plan de manejo", df$Plan, "<br>",
-                              "Tipo de combustible", df$Combustible,))
+                              "Tipo de combustible", df$Combustible))
     m
   })
   
