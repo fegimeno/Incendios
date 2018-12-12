@@ -6,7 +6,7 @@ library(dplyr)
 
 # Leaflet bindings are a bit slow; for now we'll just sample to compensate
 set.seed(100)
-zipdata <- allzips[sample.int(nrow(allzips), 100),]
+zipdata <- allzips
 # By ordering by centile, we ensure that the (comparatively rare) SuperZIPs
 # will be drawn last and thus be easier to see
 zipdata <- zipdata[order(zipdata$rol),]
@@ -16,27 +16,20 @@ function(input, output, session) {
   ## Interactive Map ###########################################
   
   # Create the map
-  output$map <- renderLeaflet({
-    leaflet() %>%
-      addTiles(
-        urlTemplate = "//{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png",
-        attribution = 'Maps by <a href="http://www.mapbox.com/">Mapbox</a>'
-      ) %>%
-      setView(lng = -70.85, lat = -35.3, zoom = 8)
+data <- reactive({
+    x <- zipdata
   })
   
-  # A reactive expression that returns the set of zips that are
-  # in bounds right now
-  zipsInBounds <- reactive({
-    if (is.null(input$map_bounds))
-      return(zipdata[FALSE,])
-    bounds <- input$map_bounds
-    latRng <- range(bounds$north, bounds$south)
-    lngRng <- range(bounds$east, bounds$west)
+  output$mymap <- renderLeaflet({
+    zipdata <- data()
     
-    subset(zipdata,
-           LAT >= latRng[1] & LAT <= latRng[2] &
-             LONG >= lngRng[1] & LONG <= lngRng[2])
+    m <- leaflet(data = zipdata) %>%
+      addTiles() %>%
+      addMarkers(lng = ~LONG,
+                 lat = ~LAT,
+                 popup = paste("Incendio", zipdata$nombre_inc, "<br>",
+                               "Plan de manejo", zipdata$SOLICITUD))
+    m
   })
   
   # Precalculate the breaks we'll need for the two histograms
