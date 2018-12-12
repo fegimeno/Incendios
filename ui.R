@@ -51,7 +51,7 @@ navbarPage("Comuna", id="nav",
            tabPanel("Data explorer",
                     fluidRow(
                       column(3,
-                             selectInput("Region", "Region", c("Todas"="", structure(Data$NOM_REG, names=Data$NOM_REG)), multiple=TRUE)
+                             selectInput("Region", "Region", c("Todas"="", structure(Data$NOM_REG)), multiple=TRUE)
                       ),
                       column(3,
                              conditionalPanel("input.states",
