@@ -22,7 +22,7 @@ function(input, output, session) {
         urlTemplate = "//{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png",
         attribution = 'Maps by <a href="http://www.mapbox.com/">Mapbox</a>'
       ) %>%
-      setView(lng = -93.85, lat = 37.45, zoom = 4)
+      setView(lng = -70.85, lat = -36.45, zoom = 4)
   })
   
   # A reactive expression that returns the set of zips that are
@@ -119,31 +119,31 @@ function(input, output, session) {
 #  }
   
   # When map is clicked, show a popup with city info
-#  observe({
-#    leafletProxy("map") %>% clearPopups()
-#    event <- input$map_shape_click
-#    if (is.null(event))
-#      return()
+  observe({
+    leafletProxy("map") %>% clearPopups()
+    event <- input$map_shape_click
+    if (is.null(event))
+      return()
     
-#    isolate({
-#      showZipcodePopup(event$id, event$lat, event$lng)
-#    })
-#  })
+    isolate({
+      showZipcodePopup(event$id, event$lat, event$lng)
+    })
+  })
   
   
   ## Data Explorer ###########################################
   
-#  observe({
-#    cities <- if (is.null(input$states)) character(0) else {
-#      filter(cleantable, State %in% input$states) %>%
-#        `$`('City') %>%
-#        unique() %>%
-#        sort()
-#    }
-#    stillSelected <- isolate(input$cities[input$cities %in% cities])
-#    updateSelectInput(session, "cities", choices = cities,
-#                      selected = stillSelected)
-#  })
+  observe({
+    cities <- if (is.null(input$states)) character(0) else {
+      filter(cleantable, State %in% input$states) %>%
+        `$`('City') %>%
+        unique() %>%
+        sort()
+    }
+    stillSelected <- isolate(input$cities[input$cities %in% cities])
+    updateSelectInput(session, "cities", choices = cities,
+                      selected = stillSelected)
+  })
   
 #  observe({
 #    zipcodes <- if (is.null(input$states)) character(0) else {
