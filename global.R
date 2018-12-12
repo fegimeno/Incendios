@@ -1,6 +1,6 @@
 library(dplyr)
 
-allzips <- readRDS("Data.rds")
+allzips <- readRDS("Data/Data.rds")
 allzips$LAT <- gsub(",", "", allzips$LAT)
 allzips$LAT <- as.numeric(allzips$LAT)  
 allzips$LONG <- gsub(",", "", allzips$LONG)
