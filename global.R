@@ -1,23 +1,28 @@
 library(dplyr)
 
-allzips <- readRDS("superzip.rds")
-allzips$latitude <- jitter(allzips$latitude)
-allzips$longitude <- jitter(allzips$longitude)
-allzips$college <- allzips$college * 100
-allzips$zipcode <- formatC(allzips$zipcode, width=5, format="d", flag="0")
-row.names(allzips) <- allzips$zipcode
+allzips <- readRDS("Data.rds")
+allzips$LAT <- gsub(",", "", allzips$LAT)
+allzips$LAT <- as.numeric(allzips$LAT)  
+allzips$LONG <- gsub(",", "", allzips$LONG)
+allzips$LONG <- as.numeric(allzips$LONG)
+
+allzips$LAT <- jitter(allzips$LAT)
+allzips$LONG <- jitter(allzips$LONG)
+
+
+#allzips$temporada <- formatC(allzips$temporada, width=5, format="d", flag="0")
+#row.names(allzips) <- allzips$zipcode
 
 cleantable <- allzips %>%
   select(
-    City = city.x,
-    State = state.x,
-    Zipcode = zipcode,
-    Rank = rank,
-    Score = centile,
-    Superzip = superzip,
-    Population = adultpop,
-    College = college,
-    Income = income,
-    Lat = latitude,
-    Long = longitude
+    Temporada = temporada,
+    Incendio = nombre_inc,
+    Rol = rol,
+    Combustible = SUBUSO,
+    Region = NOM_REG,
+    Provincia = NOM_PROV,
+    Comuna = NOM_COM,
+    Plan = SOLICITUD,
+    Lat = LAT,
+    Long = LONG
   )
