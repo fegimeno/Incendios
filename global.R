@@ -1,28 +1,11 @@
 library(dplyr)
 
-allzips <- readRDS("Data/Data.rds")
-allzips$LAT <- gsub(",", "", allzips$LAT)
-allzips$LAT <- as.numeric(allzips$LAT)  
-allzips$LONG <- gsub(",", "", allzips$LONG)
-allzips$LONG <- as.numeric(allzips$LONG)
+df <- readRDS("Data.rds")
 
-allzips$Latitud <- jitter(allzips$LAT)
-allzips$Longitud <- jitter(allzips$LONG)
+df$LAT <- gsub(",", "", df$LAT)
+df$LAT <- as.numeric(df$LAT)  
+df$LONG <- gsub(",", "", df$LONG)
+df$LONG <- as.numeric(df$LONG)
 
-
-#allzips$temporada <- formatC(allzips$temporada, width=5, format="d", flag="0")
-#row.names(allzips) <- allzips$zipcode
-
-cleantable <- allzips %>%
-  select(
-    Temporada = temporada,
-    Incendio = nombre_inc,
-    Rol = rol,
-    Combustible = SUBUSO,
-    Region = NOM_REG,
-    Provincia = NOM_PROV,
-    Comuna = NOM_COM,
-    Plan = SOLICITUD,
-    Lat = LAT,
-    Long = LONG
-  )
+df$Latitud <- jitter(df$LAT)
+df$Longitud <- jitter(df$LONG)
