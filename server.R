@@ -134,14 +134,14 @@ function(input, output, session) {
   ## Data Explorer ###########################################
   
   observe({
-    comuna <- if (is.null(input$Region)) character(0) else {
+    comunas <- if (is.null(input$Region)) character(0) else {
       filter(cleantable, Region %in% input$Region) %>%
         `$`('Comuna') %>%
         unique() %>%
         sort()
     }
-    stillSelected <- isolate(input$Comuna[input$Comuna %in% Comuna])
-    updateSelectInput(session, "Comuna", choices = Comuna,
+    stillSelected <- isolate(input$Comuna[input$comunas %in% comunas])
+    updateSelectInput(session, "comunas", choices = comunas,
                       selected = stillSelected)
   })
   
