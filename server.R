@@ -89,7 +89,7 @@ function(input, output, session) {
     
     leafletProxy("map", data = zipdata) %>%
       clearShapes() %>%
-      addCircles(~longitude, ~latitude, radius=radius, layerId=~zipcode,
+      addCircles(~LONG, ~LAT, radius=radius, layerId=~nombre_inc,
                  stroke=FALSE, fillOpacity=0.4, fillColor=pal(colorData)) %>%
       addLegend("bottomleft", pal=pal, values=colorData, title=colorBy,
                 layerId="colorLegend")
