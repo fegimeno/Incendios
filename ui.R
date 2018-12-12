@@ -29,7 +29,7 @@ navbarPage("Comuna", id="nav",
                                       draggable = TRUE, top = 60, left = "auto", right = 20, bottom = "auto",
                                       width = 330, height = "auto",
                                       
-                                      h2("ZIP explorer"),
+                                      h2("Incendios"),
                                       
                                       selectInput("color", "Color", vars),
                                       selectInput("size", "Size", vars, selected = "adultpop"),
@@ -51,15 +51,15 @@ navbarPage("Comuna", id="nav",
            tabPanel("Data explorer",
                     fluidRow(
                       column(3,
-                             selectInput("Region", "Region", c("Todas"="", structure(Data$NOM_REG)), multiple=TRUE)
+                             selectInput("Region", "Region", c("Todas"=""), multiple=TRUE)
                       ),
                       column(3,
-                             conditionalPanel("input.states",
-                                              selectInput("cities", "Cities", c("All cities"=""), multiple=TRUE)
+                             conditionalPanel("input.Region",
+                                              selectInput("comunas", "Comuna", c("All cities"=""), multiple=TRUE)
                              )
                       ),
                       column(3,
-                             conditionalPanel("input.states",
+                             conditionalPanel("input.Region",
                                               selectInput("zipcodes", "Zipcodes", c("All zipcodes"=""), multiple=TRUE)
                              )
                       )
