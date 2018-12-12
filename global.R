@@ -20,7 +20,7 @@ df <- df %>%
     Provincia = NOM_PROV,
     Comuna = NOM_COM,
     Plan = SOLICITUD,
-    Latatitud = Latitud,
+    Latitud = Latitud,
     Longitud = Longitud
   )
 
