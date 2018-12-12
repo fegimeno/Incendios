@@ -6,8 +6,8 @@ allzips$LAT <- as.numeric(allzips$LAT)
 allzips$LONG <- gsub(",", "", allzips$LONG)
 allzips$LONG <- as.numeric(allzips$LONG)
 
-allzips$LAT <- jitter(allzips$LAT)
-allzips$LONG <- jitter(allzips$LONG)
+allzips$Latitud <- jitter(allzips$LAT)
+allzips$Longitud <- jitter(allzips$LONG)
 
 
 #allzips$temporada <- formatC(allzips$temporada, width=5, format="d", flag="0")
