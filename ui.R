@@ -2,7 +2,7 @@ library(leaflet)
 
 # Choices for drop-downs
 vars <- c(
-  "Is SuperZIP?" = "superzip",
+  "Incendio" = "superzip",
   "Centile score" = "centile",
   "College education" = "college",
   "Median income" = "income",
@@ -10,9 +10,9 @@ vars <- c(
 )
 
 
-navbarPage("Superzip", id="nav",
+navbarPage("Comuna", id="nav",
            
-           tabPanel("Interactive map",
+           tabPanel("Mapa",
                     div(class="outer",
                         
                         tags$head(
@@ -51,7 +51,7 @@ navbarPage("Superzip", id="nav",
            tabPanel("Data explorer",
                     fluidRow(
                       column(3,
-                             selectInput("states", "States", c("All states"="", structure(state.abb, names=state.name), "Washington, DC"="DC"), multiple=TRUE)
+                             selectInput("Region", "Region", c("Todas"="", structure(Data$NOM_REG, names=Data$NOM_REG)), multiple=TRUE)
                       ),
                       column(3,
                              conditionalPanel("input.states",
