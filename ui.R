@@ -2,17 +2,14 @@ library(leaflet)
 
 # Choices for drop-downs
 vars <- c(
-  "Incendio" = "superzip",
-  "Centile score" = "centile",
-  "College education" = "college",
-  "Median income" = "income",
-  "Population" = "adultpop"
+  "Subuso Tierra" = "SUBUSO",
+  "Plan de manejo?" = "SOLICITUD"
 )
 
 
-navbarPage("Comuna", id="nav",
+navbarPage("Prueba Incendios-Planes de Manejo", id="nav",
            
-           tabPanel("Mapa",
+           tabPanel("Mapa interactivo",
                     div(class="outer",
                         
                         tags$head(
@@ -22,58 +19,50 @@ navbarPage("Comuna", id="nav",
                         ),
                         
                         # If not using custom CSS, set height of leafletOutput to a number instead of percent
-                        leafletOutput("mymap", width="100%", height="100%"),
+                        leafletOutput("map", width="100%", height="100%"),
                         
                         # Shiny versions prior to 0.11 should use class = "modal" instead.
                         absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
                                       draggable = TRUE, top = 60, left = "auto", right = 20, bottom = "auto",
-                                      width = 330, height = "auto",
+                                      width = 400, height = "auto",
                                       
-                                      h2("Incendios"),
+                                      h2("Opciones"),
                                       
-                                      selectInput("color", "Color", vars),
-                                      selectInput("size", "Size", vars, selected = "adultpop"),
-                                      conditionalPanel("input.color == 'superzip' || input.size == 'superzip'",
-                                                       # Only prompt for threshold when coloring or sizing by superzip
-                                                       numericInput("threshold", "SuperZIP threshold (top n percentile)", 5)
+                                      selectInput("Color", "Seleccione variable", vars),
+                                      selectInput("Tipo", "Seleccione variable", vars, selected = "SOLICITUD"),
+                                      conditionalPanel("input.Color == 'SUBUSO' || input.Tipo == 'SUBUSO'"
                                       ),
                                       
-                                      plotOutput("histCentile", height = 200),
-                                      plotOutput("scatterCollegeIncome", height = 250)
+                                      plotOutput("histo", height = 250),
+                                      plotOutput("BarBN", height = 250),
+                                      plotOutput("Barplant", height = 250)
                         ),
                         
                         tags$div(id="cite",
-                                 'Data compiled for ', tags$em('Coming Apart: The State of White America, 1960-2010'), ' by Charles Murray (Crown Forum, 2012).'
+                             tags$em('HTML Prototipo, relacion entre incendios y planes de manejo '), ' (Equipo SIMEF 2018).'
                         )
                     )
            ),
            
-           tabPanel("Data explorer",
+           tabPanel("Explorador de Datos",
                     fluidRow(
                       column(3,
-                             selectInput("Region", "Region", c("Todas"=""), multiple=TRUE)
+                             selectInput("region", "Region", c("Regiones"="", as.character(Datos$NOM_REG)), multiple=TRUE)
                       ),
                       column(3,
-                             conditionalPanel("input.Region",
-                                              selectInput("comunas", "Comuna", c("All cities"=""), multiple=TRUE)
+                             conditionalPanel("input.region",
+                                              selectInput("provincias", "Provincias", c("Provincias"=""), multiple=TRUE)
                              )
                       ),
                       column(3,
-                             conditionalPanel("input.Region",
-                                              selectInput("zipcodes", "Zipcodes", c("All zipcodes"=""), multiple=TRUE)
+                             conditionalPanel("input.region",
+                                              selectInput("comunas", "Comunas", c("Comunas"=""), multiple=TRUE)
                              )
                       )
                     ),
-                    fluidRow(
-                      column(1,
-                             numericInput("minScore", "Min score", min=0, max=100, value=0)
-                      ),
-                      column(1,
-                             numericInput("maxScore", "Max score", min=0, max=100, value=100)
-                      )
-                    ),
+                    
                     hr(),
-                    DT::dataTableOutput("ziptable")
+                    DT::dataTableOutput("table")
            ),
            
            conditionalPanel("false", icon("crosshair"))
