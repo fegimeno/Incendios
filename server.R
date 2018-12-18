@@ -6,180 +6,242 @@ library(dplyr)
 
 # Leaflet bindings are a bit slow; for now we'll just sample to compensate
 set.seed(100)
-df <- df
+datos <- Datos[sample.int(nrow(Datos), 500),]
 # By ordering by centile, we ensure that the (comparatively rare) SuperZIPs
 # will be drawn last and thus be easier to see
-
+datos <- datos[order(datos$ANO),]
 
 function(input, output, session) {
   
   ## Interactive Map ###########################################
   
   # Create the map
-data <- reactive({
-    x <- df
+  output$map <- renderLeaflet({
+    leaflet() %>%
+      addTiles(
+        urlTemplate = "//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        attribution = '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      ) %>%
+      setView(lng = -70.5, lat = -39.5, zoom = 4)
   })
   
-  output$mymap <- renderLeaflet({
-    df <- data()
+  # A reactive expression that returns the set of zips that are
+  # in bounds right now
+  datosInBounds <- reactive({
+    if (is.null(input$map_bounds))
+      return(datos[FALSE,])
+    bounds <- input$map_bounds
+    latRng <- range(bounds$north, bounds$south)
+    lngRng <- range(bounds$east, bounds$west)
     
-    m <- leaflet(data = df) %>%
-      addTiles() %>%
-      addMarkers(lng = ~Longitud,
-                 lat = ~Latitud,
-                 popup = paste("Incendio", df$Incendio, "<br>",
-                               "Plan de manejo", df$Plan, "<br>",
-                              "Tipo de combustible", df$Combustible))
-    m
+    subset(datos,
+           (LAT >= latRng[1] & LAT <= latRng[2] &
+            LONG >= lngRng[1] & LONG <= lngRng[2]))
   })
   
-  # Precalculate the breaks we'll need for the two histograms
-#  centileBreaks <- hist(plot = FALSE, allzips$centile, breaks = 20)$breaks
-  
-#  output$histCentile <- renderPlot({
-    # If no zipcodes are in view, don't plot
-#    if (nrow(zipsInBounds()) == 0)
-#      return(NULL)
+  BNInBounds <- reactive({
+    if (is.null(input$map_bounds))
+      return(datos[FALSE,])
+    bounds <- input$map_bounds
+    latRng <- range(bounds$north, bounds$south)
+    lngRng <- range(bounds$east, bounds$west)
     
-#    hist(zipsInBounds()$centile,
-#         breaks = centileBreaks,
-#         main = "SuperZIP score (visible zips)",
-#         xlab = "Percentile",
-#         xlim = range(allzips$centile),
-#         col = '#00DD00',
-#         border = 'white')
-#  })
+    subset(datos,
+           (LAT >= latRng[1] & LAT <= latRng[2] &
+              LONG >= lngRng[1] & LONG <= lngRng[2] &
+              SUBUSO == "Bosque Nativo"))
+  })
   
-#  output$scatterCollegeIncome <- renderPlot({
-    # If no zipcodes are in view, don't plot
-#    if (nrow(zipsInBounds()) == 0)
-#      return(NULL)
+  PLInBounds <- reactive({
+    if (is.null(input$map_bounds))
+      return(datos[FALSE,])
+    bounds <- input$map_bounds
+    latRng <- range(bounds$north, bounds$south)
+    lngRng <- range(bounds$east, bounds$west)
     
-#    print(xyplot(income ~ college, data = zipsInBounds(), xlim = range(allzips$college), ylim = range(allzips$income)))
-#  })
+    subset(datos,
+           (LAT >= latRng[1] & LAT <= latRng[2] &
+              LONG >= lngRng[1] & LONG <= lngRng[2] &
+              SUBUSO == "Plantacion"))
+  })
   
+  output$histo <- renderPlot({
+    # If no data are in view, don't plot
+    if (nrow(datosInBounds()) == 0)
+      return(NULL)
+    
+    plot(datosInBounds()$ESTAD_SOL,
+         main = "Incendios en Predios segun
+         Plan de Manejo",
+         xlab = "Estado del Plan de Manejo",
+         ylab = "N° de Incendios ocurridos",
+         col = '#FF0000',
+         border = 'white')
+  })
+  
+  output$BarBN <- renderPlot({
+    # If no data are in view, don't plot
+    if (nrow(datosInBounds()) == 0)
+      return(NULL)
+    
+    plot(BNInBounds()$ESTAD_SOL,
+         main = "Incendios en Predios con Bosque Nativo
+          segun Plan de Manejo",
+         xlab = "Estado del Plan de Manejo",
+         ylab = "N° de Incendios ocurridos",
+         col = '#00FF00',
+         border = 'white')
+   
+  })
+  
+  output$Barplant <- renderPlot({
+    # If no data are in view, don't plot
+    if (nrow(datosInBounds()) == 0)
+      return(NULL)
+    
+    plot(PLInBounds()$ESTAD_SOL,
+         main = "Incendios en Predios con Plantaciones
+          segun Plan de Manejo",
+         xlab = "Estado del Plan de Manejo",
+         ylab = "N° de Incendios ocurridos",
+         col = '#0000FF',
+         border = 'white')
+    
+  })
+
   # This observer is responsible for maintaining the circles and legend,
   # according to the variables the user has chosen to map to color and size.
-#  observe({
-#    colorBy <- input$color
-#    sizeBy <- input$size
+  observe({
+    colorBy <- input$Color
+    sizeBy <- input$Tipo
     
-#    if (colorBy == "superzip") {
+    if (colorBy == "SUBUSO") {
       # Color and palette are treated specially in the "superzip" case, because
       # the values are categorical instead of continuous.
-#      colorData <- ifelse(zipdata$ano >= (0 - input$threshold), "yes", "no")
-#      pal <- colorFactor("viridis", colorData)
-#    } else {
-#      colorData <- zipdata[[colorBy]]
-#      pal <- colorBin("viridis", colorData, 7, pretty = FALSE)
-#    }
+      colorData <- ifelse(as.vector(datos$SUBUSO) == "Bosque Nativo", "Bosque Nativo", ifelse(as.vector(datos$SUBUSO) == "Plantacion", "Plantacion", "Otro"))
+      pal <- colorFactor("viridis", colorData)
+    } else {
+      colorData <- datos[[colorBy]]
+      pal <- colorFactor("RdYlBu", colorData)
+    }
     
-#    if (sizeBy == "superzip") {
-#      # Radius is treated specially in the "superzip" case.
-#      radius <- ifelse(zipdata$centile >= (100 - input$threshold), 30000, 3000)
-#    } else {
-#      radius <- zipdata[[sizeBy]] / max(zipdata[[sizeBy]]) * 30000
-#    }
+    if (sizeBy == "SUBUSO") {
+      # Radius is treated specially in the "superzip" case.
+      radius <- ifelse(as.vector(datos$SUBUSO) == "Bosque Nativo", 1500, ifelse(as.vector(datos$SUBUSO) == "Plantacion", 1000,800))
+    } else {
+      radius <- ifelse(as.vector(datos$ESTAD_SOL) == "APROBADA", 1500, ifelse(as.vector(datos$ESTAD_SOL) == "REGISTRADA", 1500,800 ))
+    }
     
-#    leafletProxy("map", data = zipdata) %>%
-#      clearShapes() %>%
-#      addCircles(~LONG, ~LAT, radius=radius, layerId=~nombre_inc,
-#                 stroke=FALSE, fillOpacity=0.4, fillColor=pal(colorData)) %>%
-#      addLegend("bottomleft", pal=pal, values=colorData, title=colorBy,
-#                layerId="colorLegend")
-#  })
+    leafletProxy("map", data = datos) %>%
+      clearShapes() %>%
+      addCircles(~LONG , ~LAT, radius=radius, layerId=~IDseq,
+                 stroke=FALSE, fillOpacity=0.5, fillColor=pal(colorData)) %>%
+      addLegend("bottomleft", pal=pal, values=colorData, title=colorBy,
+                layerId="colorLegend")
+  })
   
-#  # Show a popup at the given location
-#  showZipcodePopup <- function(rol, lat, lng) {
-#    selectedZip <- allzips[allzips$rol == rol,]
-#    content <- as.character(tagList(
-#      tags$h4("Score:", as.integer(selectedZip$año)),
-#      tags$strong(HTML(sprintf("%s, %s %s",
-#                               selectedZip$NOM_COM, selectedZip$NOM_REG, selectedZip$rol
-#      )))))
-#      }
-#  showZipcodePopup <- function(zipcode, lat, lng) {
-#    selectedZip <- allzips[allzips$rol == rol,]
-#    content <- as.character(tagList(
-#      tags$h4("Score:", as.integer(selectedZip$año)),
-#      tags$strong(HTML(sprintf("%s, %s %s",
-#                               selectedZip$NOM_COM, selectedZip$NOM_REG, selectedZip$rol
-#      ))), tags$br(),
-      #sprintf("Median household income: %s", dollar(selectedZip$income * 1000)), tags$br(),
-      #sprintf("Percent of adults with BA: %s%%", as.integer(selectedZip$college)), tags$br(),
-      #sprintf("Adult population: %s", selectedZip$adultpop)
-#    ))
-#    leafletProxy("map") %>% addPopups(lng, lat, content, layerId = )
-#  }
+  # Show a popup at the given location
+  showPopup <- function(IDseq, lat, lng) {
+    Datos[,1] <- as.character(Datos[,1])
+    Datos[,2] <- as.character(Datos[,2])
+    Datos[,3] <- as.character(Datos[,3])
+    Datos[,4] <- as.character(Datos[,4])
+    Datos[,5] <- as.character(Datos[,5])
+    Datos[,6] <- as.character(Datos[,6])
+    Datos[,7] <- as.character(Datos[,7])
+    Datos[,8] <- as.character(Datos[,8])
+    Datos[,9] <- as.character(Datos[,9])
+    Datos[,10] <- as.character(Datos[,10])
+    Datos[,11] <- as.character(Datos[,11])
+    Datos[,12] <- as.character(Datos[,12])
+    Datos[,13] <- as.character(Datos[,13])
+    Datos[,14] <- as.character(Datos[,14])
+    Datos[,15] <- as.character(Datos[,15])
+    Datos[,16] <- as.character(Datos[,16])
+    Datos[,17] <- as.character(Datos[,17])
+    Datos[,19] <- as.character(Datos[,19])
+    Datos[,20] <- as.character(Datos[,20])
+    
+    selectedZip <- Datos[Datos$IDseq == IDseq,]
+    content <- as.character(tagList(
+      tags$h4("SUBUSO", selectedZip$SUBUSO),
+      
+      sprintf("Nombre Incendio: %s", selectedZip$nombre_inc), tags$br(),
+      sprintf("Nombre Predio: %s", selectedZip$nompredrea), tags$br(),
+      sprintf("Rol Predio: %s", selectedZip$rol), tags$br(),
+      sprintf("Uso: %s", selectedZip$USO), tags$br(),
+      sprintf("Subuso: %s", selectedZip$SUBUSO), tags$br(),
+      sprintf("Estado Solicitud Plan de Manejo: %s", selectedZip$ESTAD_SOL)
+    ))
+    leafletProxy("map") %>% addPopups(lng, lat, content, layerId = IDseq)
+  }
   
   # When map is clicked, show a popup with city info
-#  observe({
-#    leafletProxy("map") %>% clearPopups()
-#    event <- input$map_shape_click
-#    if (is.null(event))
-#      return()
+  observe({
+    leafletProxy("map") %>% clearPopups()
+    event <- input$map_shape_click
+    if (is.null(event))
+      return()
     
-#    isolate({
-#      showZipcodePopup(event$id, event$lat, event$lng)
-#    })
-#  })
+    isolate({
+      showPopup(event$id, event$lat, event$lng)
+    })
+  })
   
   
   ## Data Explorer ###########################################
   
   observe({
-    comunas <- if (is.null(input$Region)) character(0) else {
-      filter(df, Region %in% input$Region) %>%
+    provincias <- if (is.null(input$region)) character(0) else {
+      filter(cleantable, Region %in% input$region) %>%
+        `$`('Provincia') %>%
+        unique() %>%
+        sort()
+    }
+    stillSelected <- isolate(input$provincias[input$provincias %in% provincias])
+    updateSelectInput(session, "provincias", choices = provincias,
+                      selected = stillSelected)
+  })
+  
+  observe({
+    comunas <- if (is.null(input$region)) character(0) else {
+      cleantable %>%
+        filter(Region %in% input$region,
+               is.null(input$provincias) | Provincia %in% input$provincias) %>%
         `$`('Comuna') %>%
         unique() %>%
         sort()
     }
-    stillSelected <- isolate(input$Comuna[input$comunas %in% comunas])
+    stillSelected <- isolate(input$comunas[input$comunas %in% comunas])
     updateSelectInput(session, "comunas", choices = comunas,
                       selected = stillSelected)
   })
   
-#  observe({
-#    zipcodes <- if (is.null(input$states)) character(0) else {
-#      cleantable %>%
-#        filter(State %in% input$states,
-#               is.null(input$cities) | City %in% input$cities) %>%
-#        `$`('Zipcode') %>%
-#        unique() %>%
-#        sort()
-#    }
-#    stillSelected <- isolate(input$zipcodes[input$zipcodes %in% zipcodes])
-#    updateSelectInput(session, "zipcodes", choices = zipcodes,
-#                      selected = stillSelected)
-#  })
+  observe({
+    if (is.null(input$goto))
+      return()
+    isolate({
+      map <- leafletProxy("map")
+      map %>% clearPopups()
+      dist <- 0.5
+      ide <- input$goto$ide
+      lat <- input$goto$lat
+      lng <- input$goto$lng
+      showPopup(ide,lat, lng)
+      map %>% fitBounds(lng - dist, lat - dist, lng + dist, lat + dist)
+    })
+  })
   
-#  observe({
-#    if (is.null(input$goto))
-#      return()
-#    isolate({
-#      map <- leafletProxy("map")
-#      map %>% clearPopups()
-#      dist <- 0.5
-#      zip <- input$goto$zip
-#      lat <- input$goto$lat
-#      lng <- input$goto$lng
-#      showZipcodePopup(zip, lat, lng)
-#      map %>% fitBounds(lng - dist, lat - dist, lng + dist, lat + dist)
-#    })
-#  })
-  
-#  output$ziptable <- DT::renderDataTable({
-#    df <- cleantable %>%
-#      filter(
-#        Score >= input$minScore,
-#        Score <= input$maxScore,
-#        is.null(input$states) | State %in% input$states,
-#        is.null(input$cities) | City %in% input$cities,
-#        is.null(input$zipcodes) | Zipcode %in% input$zipcodes
-#      ) %>%
-#      mutate(Action = paste('<a class="go-map" href="" data-lat="', Lat, '" data-long="', Long, '" data-zip="', Zipcode, '"><i class="fa fa-crosshairs"></i></a>', sep=""))
-#    action <- DT::dataTableAjax(session, df)
+  output$table <- DT::renderDataTable({
+    df <- cleantable %>%
+      filter(
+        is.null(input$region) | Region %in% input$region,
+        is.null(input$provincias) |  Provincia %in% input$provincias,
+        is.null(input$comunas) | Comuna %in% input$comunas
+      ) %>%
+      mutate(Action = paste('<a class="go-map" href="" data-lat="', LAT, '" data-long="', LONG,'" data-ide="', IDseq,  '"><i class="fa fa-crosshairs"></i></a>', sep=""))
+    action <- DT::dataTableAjax(session, df)
     
-#    DT::datatable(df, options = list(ajax = list(url = action)), escape = FALSE)
-#  })
+    DT::datatable(df, options = list(ajax = list(url = action)), escape = FALSE)
+  })
 }
