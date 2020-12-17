@@ -28,8 +28,8 @@ navbarPage("Prueba Incendios-Planes de Manejo", id="nav",
                                       
                                       h2("Opciones"),
                                       
-                                      selectInput("Color", "Seleccione variable", vars),
-                                      selectInput("Tipo", "Seleccione variable", vars, selected = "SOLICITUD"),
+                                      selectInput("Color", "Seleccione variable (Cambia color)", vars),
+                                      selectInput("Tipo", "Seleccione variable (Cambia tamaño)", vars, selected = "SOLICITUD"),
                                       conditionalPanel("input.Color == 'SUBUSO' || input.Tipo == 'SUBUSO'"
                                       ),
                                       
