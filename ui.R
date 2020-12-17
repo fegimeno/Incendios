@@ -3,7 +3,7 @@ library(leaflet)
 # Choices for drop-downs
 vars <- c(
   "Subuso Tierra" = "SUBUSO",
-  "Plan de manejo?" = "SOLICITUD"
+  "Estado Plan de manejo" = "SOLICITUD"
 )
 
 
